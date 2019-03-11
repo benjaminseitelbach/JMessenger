@@ -30,14 +30,12 @@ import java.sql.Statement;
 public class Main extends Application {
 
     static int numeroLigneSalon = 4;
+    static String pseudo;
 
     public static void debug () {
-        String test1 = "Oui";
-        String test2 = "Oui";
 
-        boolean egalite = test1.equals(test2);
-
-        System.out.println(egalite);
+        //sql("ALTER TABLE utilisateurs ADD salon VARCHAR(50);");
+        sql("UPDATE utilisateurs SET salon = 'Les BRO' WHERE pseudo = 'Benjo';");
 
     }
 
@@ -52,6 +50,22 @@ public class Main extends Application {
             Statement stmt = con.createStatement();
 
             stmt.executeUpdate("INSERT INTO utilisateurs (pseudo, mdp) VALUES ('"+sPseudo+"','"+sMdp+"')");
+
+            con.close();
+        }catch(Exception e){ System.out.println(e);}
+
+    }
+
+    public static void sql(String instruction) {
+        try{
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con= DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/Jmessenger?zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=UTC","root","root");
+
+            Statement stmt = con.createStatement();
+
+            stmt.executeUpdate(instruction);
 
             con.close();
         }catch(Exception e){ System.out.println(e);}
@@ -134,11 +148,10 @@ public class Main extends Application {
         grilleConnexion.add(connexion, 0, 4);
 
         Button inscription = new Button("Inscription");
-
-        grilleConnexion.add(inscription, 2, 4);
+        grilleConnexion.add(inscription, 1, 4);
 
         //Initialisation de la scene de la page connexion
-        Scene sceneConnexion = new Scene(grilleConnexion, 500, 300);
+        Scene sceneConnexion = new Scene(grilleConnexion, 300, 200);
 
         //Initialisation de la page principale
         Stage pagePrincipale = new Stage();
@@ -160,14 +173,14 @@ public class Main extends Application {
 
         //Nom du salon
         Label texteNomSalonCreation = new Label("Nom du salon:");
-        grillePrincipale.add(texteNomSalonCreation,2,1);
+        grillePrincipale.add(texteNomSalonCreation,0,2);
 
         //Saisie du nom du salon
         TextField saisieNomSalonCreation = new TextField();
-        grillePrincipale.add(saisieNomSalonCreation, 2, 2);
+        grillePrincipale.add(saisieNomSalonCreation, 1, 2);
 
         Button boutonCreer = new Button("Créer");
-        grillePrincipale.add(boutonCreer, 2, 3);
+        grillePrincipale.add(boutonCreer, 2, 2);
 
         saisieNomSalonCreation.setVisible(false);
         texteNomSalonCreation.setVisible(false);
@@ -182,7 +195,7 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent e) {
 
-                String pseudo = saisiePseudo.getText();
+                pseudo = saisiePseudo.getText();
                 String mdp = saisieMdp.getText();
                 Utilisateur utilisateur = new Utilisateur(pseudo, mdp);
                 if(rechercheUtilisateur(pseudo, mdp)) {
@@ -214,7 +227,7 @@ public class Main extends Application {
 
             @Override
             public void handle(ActionEvent e) {
-                String pseudo = saisiePseudo.getText();
+                pseudo = saisiePseudo.getText();
                 String mdp = saisieMdp.getText();
                 Utilisateur utilisateur = new Utilisateur(pseudo, mdp);
                 System.out.println(pseudo);
@@ -231,30 +244,116 @@ public class Main extends Application {
             }
         });
 
+        boutonCreerSalon.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent e) {
+                boutonCreerSalon.setVisible(false);
+                saisieNomSalonCreation.setVisible(true);
+                texteNomSalonCreation.setVisible(true);
+                boutonCreer.setVisible(true);
+            }
+        });
+
         boutonCreer.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent e) {
 
+                boutonCreerSalon.setVisible(true);
+                //sql("INSERT INTO utilisateurs (pseudo, mdp) VALUES ('"+sPseudo+"','"+sMdp+"')");
+
                 String nomSalonCreation = saisieNomSalonCreation.getText();
+
+                //sql("ALTER TABLE utilisateurs ADD salon VARCHAR(50);");
+                //sql("UPDATE utilisateurs SET salon = '"+nomSalonCreation+"' WHERE pseudo = '"+pseudo+"';");
+
                 //Initialisation de la page du salon
                 Stage pageSalon = new Stage();
                 pageSalon.setTitle(nomSalonCreation);
 
                 GridPane grilleSalon = new GridPane();
-                grilleSalon.setAlignment(Pos.TOP_LEFT);
-                grilleSalon.setHgap(10);
-                grilleSalon.setVgap(10);
-                grilleSalon.setPadding(new Insets(25, 25, 25, 25));
+                //grilleSalon.setAlignment(Pos.TOP_LEFT);
+                grilleSalon.setHgap(15);
+                grilleSalon.setVgap(1);
+
+                grilleSalon.setPadding(new Insets(25, 0, 0, 0));
 
                 Text texteNomSalon = new Text(nomSalonCreation);
-                grilleSalon.add(texteNomSalon, 5, 0);
+                texteNomSalon.setFont(Font.font ("Verdana", 20));
+                grilleSalon.add(texteNomSalon, 1, 0);
+
+                Button boutonVoirMembres = new Button("Voir membres");
+                grilleSalon.add(boutonVoirMembres, 1, 3);
 
                 Button boutonAjouterMembre = new Button("Ajouter un membre");
-                grilleSalon.add(boutonAjouterMembre, 1, 1);
+                grilleSalon.add(boutonAjouterMembre, 2, 3);
+
+                Text textePseudoMembre = new Text("Pseudo du membre à ajouter:");
+                grilleSalon.add(textePseudoMembre, 2, 3);
+
+                TextField saisiePseudoMembre = new TextField();
+                grilleSalon.add(saisiePseudoMembre, 2, 4);
+
+                Button boutonAjouter = new Button ("Ajouter");
+                grilleSalon.add(boutonAjouter, 2, 5);
+
+                textePseudoMembre.setVisible(false);
+                saisiePseudoMembre.setVisible(false);
+                boutonAjouter.setVisible(false);
+
+                Button boutonSupprimerMembre = new Button("Supprimer un membre");
+                grilleSalon.add(boutonSupprimerMembre, 3, 3, 8, 1);
+
+                Text textePseudoMembreSupprimer = new Text("Pseudo du membre à supprimer:");
+                grilleSalon.add(textePseudoMembreSupprimer, 3, 3, 8, 1);
+
+                TextField saisiePseudoMembreSupprimer = new TextField();
+                grilleSalon.add(saisiePseudoMembreSupprimer, 3, 4, 8, 1);
+
+                Button boutonSupprimer = new Button ("Supprimer");
+                grilleSalon.add(boutonSupprimer, 3, 5, 8, 1);
+
+                textePseudoMembreSupprimer.setVisible(false);
+                saisiePseudoMembreSupprimer.setVisible(false);
+                boutonSupprimer.setVisible(false);
+
+                TextField saisieMessage = new TextField();
+                //saisieMessage.setMinSize( 3, 30);
+                grilleSalon.add(saisieMessage, 0, 400, 10, 1);
+
+                Button boutonEnvoyerMessage = new Button("Envoyer");
+                //boutonEnvoyerMessage.setMinSize(50,30);
+                grilleSalon.add(boutonEnvoyerMessage, 10, 400);
 
                 Scene sceneSalon= new Scene(grilleSalon, 500, 500);
                 pageSalon.setScene(sceneSalon);
+
+                boutonAjouterMembre.setOnAction(new EventHandler<ActionEvent>() {
+
+                    @Override
+                    public void handle(ActionEvent e) {
+                        boutonAjouterMembre.setVisible(false);
+                        textePseudoMembre.setVisible(true);
+                        saisiePseudoMembre.setVisible(true);
+                        boutonAjouter.setVisible(true);
+                    }
+                });
+
+                boutonAjouter.setOnAction(new EventHandler<ActionEvent>() {
+                    int numeroLigneMembre = 3;
+                    @Override
+                    public void handle(ActionEvent e) {
+                        String nomMembre = saisiePseudoMembre.getText();
+                        boutonAjouterMembre.setVisible(true);
+                        textePseudoMembre.setVisible(false);
+                        saisiePseudoMembre.setVisible(false);
+                        boutonAjouter.setVisible(false);
+                        Text texteNomMembre = new Text(nomMembre);
+                        grilleSalon.add(texteNomMembre, 1, numeroLigneMembre);
+                        numeroLigneMembre ++;
+                    }
+                });
 
 
                 pageSalon.show();
@@ -272,15 +371,7 @@ public class Main extends Application {
             }
         });
 
-        boutonCreerSalon.setOnAction(new EventHandler<ActionEvent>() {
 
-            @Override
-            public void handle(ActionEvent e) {
-                saisieNomSalonCreation.setVisible(true);
-                texteNomSalonCreation.setVisible(true);
-                boutonCreer.setVisible(true);
-            }
-        });
         pageConnexion.setScene(sceneConnexion);
         pageConnexion.show();
     }
