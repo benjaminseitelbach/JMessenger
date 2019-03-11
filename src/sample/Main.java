@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class Main extends Application {
 
@@ -105,6 +106,39 @@ public class Main extends Application {
 
     }
 
+    public static ArrayList<String> getSalons (String pseudo) {
+        try{
+
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con= DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/Jmessenger?zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=UTC","root","root");
+
+            Statement stmt = con.createStatement();
+
+            ResultSet rs=stmt.executeQuery("select * from utilisateurs");
+
+            while(rs.next()) {
+
+                if (pseudo.equals(rs.getString(1))) {
+                    ArrayList<String> salons = new ArrayList<String>();
+                    int colonne = 1;
+                    while(!rs.getString(colonne).isEmpty()){
+                        salons.add(rs.getString(colonne+2));
+                    }
+                    con.close();
+                    return salons;
+                }
+
+            }
+
+            con.close();
+
+        }catch(Exception e){
+            System.out.println(e);
+            return new ArrayList<String>();
+        }
+        return new ArrayList<String>();
+    }
 
     @Override
     public void start(Stage pageConnexion) {
@@ -204,6 +238,12 @@ public class Main extends Application {
                     scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
                     grillePrincipale.add(scenetitle, 0, 0, 2, 1);
                     pagePrincipale.setScene(scenePrincipale);
+                    /*ArrayList<String> salons = getSalons(pseudo);
+                    for(int i = 0; i < salons.size(); i++) {
+                        System.out.println(salons.get(i));
+
+                    }
+                    */
                     pagePrincipale.show();
                     pageConnexion.close();
 
@@ -215,9 +255,7 @@ public class Main extends Application {
                     actiontarget.setText("Pseudo ou mot de passe incorrect");
                     grilleConnexion.add(actiontarget, 0, 6);
 
-
                 }
-
 
             }
         });
@@ -261,12 +299,14 @@ public class Main extends Application {
             public void handle(ActionEvent e) {
 
                 boutonCreerSalon.setVisible(true);
-                //sql("INSERT INTO utilisateurs (pseudo, mdp) VALUES ('"+sPseudo+"','"+sMdp+"')");
 
                 String nomSalonCreation = saisieNomSalonCreation.getText();
 
-                //sql("ALTER TABLE utilisateurs ADD salon VARCHAR(50);");
-                //sql("UPDATE utilisateurs SET salon = '"+nomSalonCreation+"' WHERE pseudo = '"+pseudo+"';");
+                sql("INSERT INTO salons (nom) VALUES ('"+nomSalonCreation+"');");
+
+                sql("ALTER TABLE salons ADD createur VARCHAR(10)");
+
+                sql("UPDATE salons SET createur = '"+pseudo+"' WHERE nom = '"+nomSalonCreation+"';");
 
                 //Initialisation de la page du salon
                 Stage pageSalon = new Stage();
